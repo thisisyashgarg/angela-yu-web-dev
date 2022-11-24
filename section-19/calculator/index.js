@@ -13,6 +13,7 @@ app.get('/', (req, res) => {
 });
 
 app.post('/', (req, res) => {
+    console.log(req.body); // use to get input that user has entered
     res.send(`Your BMI is ${req.body.weight/(req.body.height * req.body.height)}`);
  });
 
