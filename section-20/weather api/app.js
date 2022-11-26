@@ -24,10 +24,11 @@ axios(uri)
     const cityName = response.data.name;
     const temperature = response.data.main.temp;
     const imageURL = 'http://openweathermap.org/img/wn/' + iconElement + '@2x.png';
-    res.write(`<h1>The weather condition is ${weatherDescription}<h1/>`)
-    res.write(`<h2>The temperature of ${cityName} is ${temperature} degree celsius<h2/>`)
-    res.write("<img src = " + imageURL+ " >")
-    res.send();
+    res.send(
+        `<h1>The weather condition is ${weatherDescription}<h1/>
+         <h2>The temperature of ${cityName} is ${temperature} degree celsius<h2/>
+         <img src = ${imageURL} >`
+    );
 })
 .catch((err) => res.send("<h1> 404 Error - Something went wrong - Please try again"));
     
