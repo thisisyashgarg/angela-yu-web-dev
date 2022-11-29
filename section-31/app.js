@@ -6,11 +6,12 @@ const __dirname = path.resolve();
 import bodyParser from 'body-parser'
 import mongoose from 'mongoose';
 
-
 const app = express();
-app.listen(3002 , () => console.log('listenig on 3002'));
 app.use(bodyParser.urlencoded({extended: true}));
-await mongoose.connect(`mongodb+srv://yashgarg:${process.env.PASSWORD}@cluster0.fhdwxom.mongodb.net/wikiDB?retryWrites=true&w=majority`, () =>{
+mongoose.connect(`mongodb+srv://yashgarg:${process.env.PASSWORD}@cluster0.fhdwxom.mongodb.net/wikiDB?retryWrites=true&w=majority`, (err) =>{
+    if(err){
+        console.log('error connecting to database')
+    }
     console.log('db connected')
 });
 
@@ -22,9 +23,24 @@ const articleSchema = {
 const Article = new mongoose.model("Article", articleSchema);
 
 
-app.get('/', (req, res) =>{
- res.send('hi');
+//routing
+app.get('/articles', (req, res) =>{
+   Article.find((err, articles) =>{
+    if(err){
+        res.send(err);
+    }
+    res.send(articles);
+   })
 });
+
+app.post('/articles', (req, res) =>{
+    console.log(req.body.title);
+    console.log(req.body.content);
+ });
+
+app.listen(5002 , () => console.log('listenig on 5002'));
+
+
 
 
 
