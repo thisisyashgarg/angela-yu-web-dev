@@ -1,6 +1,6 @@
 import { MongoClient,ServerApiVersion } from "mongodb";
 // Replace the uri string with your connection string.
-const uri = "mongodb+srv://yashgarg:yashgarg@node.5e1qq6c.mongodb.net/?retryWrites=true&w=majority";
+const uri = "mongodb+srv://yashgarg:<>@node.5e1qq6c.mongodb.net/?retryWrites=true&w=majority";
 const client = new MongoClient(uri);
 async function run() {
   try {

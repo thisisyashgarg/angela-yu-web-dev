@@ -3,7 +3,7 @@ const databaseName = 'angela';
 
 import { Car, Fruit} from './addingData.js'
 
-await mongoose.connect(`mongodb+srv://yashkgarg:yashkgarg@cluster0.32wetmu.mongodb.net/${databaseName}?retryWrites=true&w=majority`)
+await mongoose.connect(`mongodb+srv://yashkgarg:<>@cluster0.32wetmu.mongodb.net/${databaseName}?retryWrites=true&w=majority`)
 .then(() => console.log('db connected'))
 .catch(error => console.log(error));
 
