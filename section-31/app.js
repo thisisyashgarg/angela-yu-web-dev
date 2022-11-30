@@ -9,10 +9,7 @@ import mongoose from 'mongoose';
 const app = express();
 app.use(bodyParser.urlencoded({extended: true}));
 mongoose.connect(`mongodb+srv://yashgarg:${process.env.PASSWORD}@cluster0.fhdwxom.mongodb.net/wikiDB?retryWrites=true&w=majority`, (err) =>{
-    if(err){
-        console.log('error connecting to database')
-    }
-    console.log('db connected')
+    console.log('db connected');
 });
 
 //article schema for database
@@ -36,9 +33,17 @@ app.get('/articles', (req, res) =>{
 app.post('/articles', (req, res) =>{
     console.log(req.body.title);
     console.log(req.body.content);
+
+    const newArticle = new Article({
+        title: req.body.title,
+        content : req.body.content
+    });
+    newArticle.save((data) => console.log(`${data} ADDED`));
+    res.send('data added')
+
  });
 
-app.listen(5002 , () => console.log('listenig on 5002'));
+app.listen(5002 , () => console.log('listening on 5002'));
 
 
 
