@@ -2,8 +2,6 @@ import express from 'express';
 import dotenv from 'dotenv'
 dotenv.config();
 import ejs from 'ejs'
-import path from 'path';
-const __dirname = path.resolve();
 import bodyParser from 'body-parser'
 import mongoose from 'mongoose';
 
@@ -20,7 +18,7 @@ const articleSchema = {
 }
 const Article = new mongoose.model("Article", articleSchema);
 
-//////////////////////////////////////////////////////ARTICLES
+//////////////////////////////////////////////////////ARTICLES////////////////
 app.route('/articles')
 .get((req, res) =>{
     Article.find((err, articles) =>{

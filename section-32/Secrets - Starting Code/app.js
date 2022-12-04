@@ -1,23 +1,30 @@
 import express from "express";
+import dotenv from 'dotenv'
+dotenv.config();
 import bodyParser from "body-parser";
-import ejs from 'ejs'
 import mongoose from "mongoose";
+// import encrypt from "mongoose-encryption";  //level 2 encryption
+import md5 from 'md5'
 
 const app = express();
 app.use(express.static('public'));
-app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
-mongoose.connect(`mongodb+srv://yashgarg:yashgarg@cluster0.fhdwxom.mongodb.net/userDB?retryWrites=true&w=majority`, (err) =>{
+mongoose.connect(`mongodb+srv://yashgarg:${process.env.PASSWORD}@cluster0.fhdwxom.mongodb.net/userDB?retryWrites=true&w=majority`, (err) =>{
     if(err){
         res.send(`Something went wrong: ${err}`);
     }
     console.log('db connected');
 });
 
-const userSchema = {
+const userSchema = new mongoose.Schema ({
     email: String,
-    passowrd: String
-}
+    password: String
+});
+
+//encryption - level 2
+// userSchema.plugin(encrypt, { secret: process.env.SECRET, encryptedFields: ['password'] });
+//encryption - level 2
+
 const User = mongoose.model('Users', userSchema);
 
 app.get('/', (req, res) => {
@@ -29,12 +36,13 @@ app.route('/login')
     res.render('login.ejs');
 })
 .post((req, res) =>{
+   //level 3 - hashing
    User.findOne({email: req.body.username }, (err, foundUser) =>{
       if(err){
-        res.send('user not found');
+        res.send(err);
       } else{
         if(foundUser){
-            if(foundUser.passowrd === req.body.passowrd){
+            if(foundUser.password === md5(req.body.password)){
                 res.render('secrets.ejs')
             }
         } 
@@ -50,7 +58,7 @@ app.route('/register')
 .post((req, res) => {
     const newUser = new User({
         email: req.body.username,
-        passowrd: req.body.passowrd
+        password: md5(req.body.password)
     });
     newUser.save((err) =>{
         if(err){
@@ -59,7 +67,7 @@ app.route('/register')
         }
         res.render('secrets.ejs');
     })
-})
+});
 
 
 
