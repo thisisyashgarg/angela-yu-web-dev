@@ -14,8 +14,8 @@ import findOrCreate from 'mongoose-findorcreate'
 const saltRounds = 10;
 const app = express();
 
-app.use(express.static('public'));
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(express.static('public')); // for rendering dynamic pages
+app.use(bodyParser.urlencoded({extended: true})); //to get body of data that is entered and tap into it 
 app.use(session({
     secret: "mySecret",
     resave: false,
@@ -24,6 +24,7 @@ app.use(session({
 app.use(passport.initialize()); //starting passport
 app.use(passport.session()); //starting session with passport
 
+//connection with database
 mongoose.connect(`mongodb+srv://yashgarg:${process.env.PASSWORD}@cluster0.fhdwxom.mongodb.net/userDB?retryWrites=true&w=majority`, (err) =>{
     if(err){
         res.send(`Something went wrong: ${err}`);
@@ -31,6 +32,7 @@ mongoose.connect(`mongodb+srv://yashgarg:${process.env.PASSWORD}@cluster0.fhdwxo
     console.log('db connected');
 });
 
+//defining user schema
 const userSchema = new mongoose.Schema ({
     email: String,
     password: String,
@@ -40,15 +42,21 @@ const userSchema = new mongoose.Schema ({
 
 //for passport local mongoose
 userSchema.plugin(passportLocalMongoose);
+
+//creating the findOrCreate function for google oauth strategy
 userSchema.plugin(findOrCreate);
 
 //encryption - level 2
 // userSchema.plugin(encrypt, { secret: process.env.SECRET, encryptedFields: ['password'] });
 //encryption - level 2
 
+//creating a mongoose db model with User as an instance
 const User = mongoose.model('Users', userSchema);
 
+//creating a strategy with User instance
 passport.use(User.createStrategy());
+
+//turn data into cookie
 passport.serializeUser(function(user, cb) {
     process.nextTick(function() {
       return cb(null, {
@@ -57,12 +65,14 @@ passport.serializeUser(function(user, cb) {
         picture: user.picture
       });
     });
-}); //turn data into cookie
+}); 
+
+//turn cookie into data
 passport.deserializeUser(function(user, cb) {
     process.nextTick(function() {
       return cb(null, user);
     });
-}); //turn cookie into data
+}); 
 
 //oauth2 google strategy
 passport.use(new GoogleStrategy({
@@ -80,16 +90,21 @@ passport.use(new GoogleStrategy({
 ));
 //oauth2 google strategy
 
+///////////////////////////ALL THE ROUTES //////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////
 app.get('/', (req, res) => {
     res.render('home.ejs');
 });
 ///////////////////////////////////////////////////////////////////////////
-//for login and register
+
+////////////////////////////////////////////////////////////////////////////
+//for login and register via oauth
+//this opens the page with all your google ids
 app.get('/auth/google',
   passport.authenticate('google', { scope: ["profile"] })
 );
+
 //for redirecting them back to secrets or login in error case
 app.get('/auth/google/secrets', 
   passport.authenticate('google', { failureRedirect: '/login' }),
@@ -99,7 +114,7 @@ app.get('/auth/google/secrets',
   });
 ///////////////////////////////////////////////////////////////////////////
 
-
+///////////////////////////////////////////////////////////////////////////
 app.route('/login')
 .get((req, res) => {
     res.render('login.ejs')
@@ -129,13 +144,14 @@ app.route('/login')
         if (err) {
             console.log(err);
         }
+        //authentication via passport
         passport.authenticate('local')(req, res, () => {
             res.redirect('/secrets');
          })
       })
 });
 
- ///////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
 app.route('/register')
 .get((req, res) => {
     res.render('register.ejs');
@@ -157,6 +173,7 @@ app.route('/register')
      if(err){
         console.log(err);
      }
+     //authentication via passport
      passport.authenticate('local')(req, res, () => {
         res.redirect('/secrets')
      })
@@ -164,6 +181,7 @@ app.route('/register')
 });
 ///////////////////////////////////////////////////////////////////////////
 
+///////////////////////////////////////////////////////////////////////////
 app.get('/secrets', (req, res) =>{
 //    if(req.isAuthenticated){
 //     return res.render('secrets.ejs')
@@ -174,16 +192,16 @@ app.get('/secrets', (req, res) =>{
     if(err){
         console.log(err)
     }else{
+        //userWithScrets is an object with all the secrets of users in the database
         if(foundUsers){
             res.render('secrets.ejs', {usersWithSecrets: foundUsers});
         }
     }
-
    })
-});
-
+}); 
 ///////////////////////////////////////////////////////////////////////////
 
+///////////////////////////////////////////////////////////////////////////
 app.get('/logout', (req, res) => {
     req.logout((err) =>{
         if(err){
@@ -192,10 +210,12 @@ app.get('/logout', (req, res) => {
         res.redirect('/')
     });
 });
+///////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////
 app.route('/submit')
 .get((req, res) =>{
+    //checking whether the user is loggeg in or not
     if(req.isAuthenticated){
         return res.render('submit.ejs')
     }
@@ -219,7 +239,7 @@ app.route('/submit')
         }
     })
 });
-
+///////////////////////////////////////////////////////////////////////////
 
 
 app.listen(4000, () =>{
